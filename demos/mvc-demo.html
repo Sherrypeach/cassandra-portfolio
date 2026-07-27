@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-101 — MVC Task Manager Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .app-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:28px;}
+  @media (max-width:800px){ .app-grid{grid-template-columns:1fr;} }
+
+  /* Task app (the "product") */
+  .app-body{padding:20px;}
+  .add-row{display:flex; gap:8px; margin-bottom:16px;}
+  .add-row input{
+    flex:1; padding:10px 12px; border:1px solid var(--ink); font-family:'Inter'; font-size:0.9rem;
+  }
+  .add-row button{
+    background:var(--amber); border:1px solid var(--ink); color:var(--ink); font-weight:600;
+    padding:10px 16px; cursor:pointer; font-family:'IBM Plex Mono'; font-size:0.78rem; text-transform:uppercase;
+  }
+  .add-row button:hover{background:#d69528;}
+  ul.tasks{list-style:none;}
+  ul.tasks li{
+    display:flex; align-items:center; gap:10px; padding:10px 6px; border-bottom:1px dashed rgba(11,37,69,0.2);
+  }
+  ul.tasks li.done span.text{text-decoration:line-through; color:#999;}
+  ul.tasks li .text{flex:1; font-size:0.92rem;}
+  ul.tasks li button{
+    background:none; border:1px solid var(--ink); font-family:'IBM Plex Mono'; font-size:0.68rem;
+    padding:4px 8px; cursor:pointer; color:var(--ink); text-transform:uppercase;
+  }
+  ul.tasks li button.del{border-color:var(--red); color:var(--red);}
+  .empty-note{color:#999; font-style:italic; font-size:0.88rem; padding:10px 0;}
+
+  /* Trace panel (the "architecture proof") */
+  .trace-log{padding:16px; max-height:460px; overflow-y:auto; font-family:'IBM Plex Mono'; font-size:0.78rem;}
+  .trace-entry{margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed rgba(11,37,69,0.15);}
+  .trace-entry .layer{
+    display:inline-block; font-weight:600; padding:2px 8px; margin-bottom:6px; font-size:0.68rem;
+    letter-spacing:0.05em; text-transform:uppercase;
+  }
+  .layer.controller{background:#E8A33D33; color:#8a5f13;}
+  .layer.model{background:#5FC9D633; color:#0d6c78;}
+  .layer.view{background:#3FA65C33; color:#22682f;}
+  .trace-entry .msg{color:var(--graphite); line-height:1.5;}
+  .trace-empty{color:#999; font-style:italic; padding:10px 0;}
+  .arch-note{font-size:0.85rem; color:var(--graphite); margin-top:14px; line-height:1.6;}
+  .arch-note code{background:var(--paper-dim); padding:1px 5px; font-family:'IBM Plex Mono'; font-size:0.82rem;}
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <a class="back" href="../index.html">← Back to portfolio</a>
+  <span class="sheet-id">Sheet A-101 · MVC Full-Stack App</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>MVC Task Manager — Architecture in Action</h1>
+    <p>This runs entirely in your browser (GitHub Pages can't host a live Node/Express/PostgreSQL backend), but it mirrors the exact separation of concerns used in the real project: a <strong>Controller</strong> that receives actions, a <strong>Model</strong> that owns the data, and a <strong>View</strong> that only renders. Every click on the left produces a real trace on the right, so you can see the architecture actually working, not just described.</p>
+  </div>
+
+  <div class="app-grid">
+    <div class="panel">
+      <div class="panel-title">View — Task List</div>
+      <div class="app-body">
+        <div class="add-row">
+          <input id="taskInput" type="text" placeholder="Add a new task…" maxlength="60">
+          <button id="addBtn">Add</button>
+        </div>
+        <ul class="tasks" id="taskList"></ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Request / Data Flow Trace</div>
+      <div class="trace-log" id="traceLog">
+        <div class="trace-empty">Interact with the task list to see the Controller → Model → View flow.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="arch-note">
+    How to read it: adding a task fires <code>Controller.create()</code>, which validates the input, asks <code>Model.tasks</code> to persist a new record, and only then tells the <code>View</code> to re-render — the View never touches the data directly. That's the same rule this project follows: routes call controllers, controllers call models, views only display what they're given.
+  </p>
+</main>
+
+<footer class="demo-footer">© 2026 Cassandra Elena Perche Molina — Portfolio demo, not to scale.</footer>
+
+<script>
+(function(){
+  // ---- MODEL ----
+  const Model = {
+    tasks: [
+      { id: 1, text: "Design the database schema", done: true },
+      { id: 2, text: "Build the Express routes", done: false },
+    ],
+    nextId: 3,
+    add(text){
+      const task = { id: this.nextId++, text, done:false };
+      this.tasks.push(task);
+      return task;
+    },
+    toggle(id){
+      const t = this.tasks.find(t=>t.id===id);
+      if(t) t.done = !t.done;
+      return t;
+    },
+    remove(id){
+      const idx = this.tasks.findIndex(t=>t.id===id);
+      if(idx>-1) return this.tasks.splice(idx,1)[0];
+    }
+  };
+
+  // ---- VIEW ----
+  const View = {
+    listEl: document.getElementById('taskList'),
+    render(tasks){
+      this.listEl.innerHTML = "";
+      if(tasks.length===0){
+        this.listEl.innerHTML = '<li class="empty-note">No tasks yet — add one above.</li>';
+        return;
+      }
+      tasks.forEach(t=>{
+        const li = document.createElement('li');
+        if(t.done) li.classList.add('done');
+        li.innerHTML = `
+          <span class="text">${escapeHtml(t.text)}</span>
+          <button data-action="toggle" data-id="${t.id}">${t.done? 'Undo':'Done'}</button>
+          <button data-action="delete" data-id="${t.id}" class="del">Delete</button>
+        `;
+        this.listEl.appendChild(li);
+      });
+    }
+  };
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---- TRACE LOGGER ----
+  const traceEl = document.getElementById('traceLog');
+  let firstLog = true;
+  function log(layer, msg){
+    if(firstLog){ traceEl.innerHTML=""; firstLog=false; }
+    const entry = document.createElement('div');
+    entry.className = 'trace-entry';
+    entry.innerHTML = `<span class="layer ${layer}">${layer}</span><div class="msg">${msg}</div>`;
+    traceEl.prepend(entry);
+  }
+
+  // ---- CONTROLLER ----
+  const Controller = {
+    create(text){
+      log('controller', `Received <b>POST /tasks</b> with body <code>{ text: "${escapeHtml(text)}" }</code>`);
+      if(!text || !text.trim()){
+        log('controller', `Validation failed: empty text rejected before touching the Model.`);
+        return;
+      }
+      const task = Model.add(text.trim());
+      log('model', `Inserted new record <code>id:${task.id}</code> into the in-memory task store.`);
+      View.render(Model.tasks);
+      log('view', `Re-rendered task list (${Model.tasks.length} tasks). View never wrote to the data — it only displayed it.`);
+    },
+    toggle(id){
+      log('controller', `Received <b>PATCH /tasks/${id}</b> to toggle completion.`);
+      const t = Model.toggle(id);
+      log('model', `Updated record <code>id:${id}</code> → done:${t.done}.`);
+      View.render(Model.tasks);
+      log('view', `Re-rendered task list to reflect the updated state.`);
+    },
+    remove(id){
+      log('controller', `Received <b>DELETE /tasks/${id}</b>.`);
+      const t = Model.remove(id);
+      log('model', `Removed record <code>id:${id}</code> ("${escapeHtml(t.text)}") from the store.`);
+      View.render(Model.tasks);
+      log('view', `Re-rendered task list (${Model.tasks.length} tasks remaining).`);
+    }
+  };
+
+  // ---- Wiring (routes) ----
+  document.getElementById('addBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('taskInput');
+    Controller.create(input.value);
+    input.value = "";
+  });
+  document.getElementById('taskInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ document.getElementById('addBtn').click(); }
+  });
+  document.getElementById('taskList').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const id = Number(btn.dataset.id);
+    if(btn.dataset.action === 'toggle') Controller.toggle(id);
+    if(btn.dataset.action === 'delete') Controller.remove(id);
+  });
+
+  View.render(Model.tasks);
+})();
+</script>
+</body>
+</html>

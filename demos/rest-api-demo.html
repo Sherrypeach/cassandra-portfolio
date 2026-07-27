@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-102 — REST API Explorer Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .explorer{display:grid; grid-template-columns:1fr 1fr; gap:28px;}
+  @media (max-width:800px){ .explorer{grid-template-columns:1fr;} }
+  .req-body{padding:20px;}
+  .method-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .method-btn{
+    font-family:'IBM Plex Mono'; font-size:0.75rem; padding:8px 12px; border:1px solid var(--ink);
+    background:#fff; cursor:pointer; color:var(--ink); letter-spacing:0.03em;
+  }
+  .method-btn.active{background:var(--ink); color:var(--paper);}
+  .endpoint-select{width:100%; padding:10px 12px; border:1px solid var(--ink); font-family:'IBM Plex Mono'; font-size:0.85rem; margin-bottom:14px; background:#fff;}
+  label.field-label{font-family:'IBM Plex Mono'; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--blue); display:block; margin-bottom:6px;}
+  textarea#reqBody{
+    width:100%; min-height:120px; font-family:'IBM Plex Mono'; font-size:0.82rem; padding:12px;
+    border:1px solid var(--ink); resize:vertical; margin-bottom:14px;
+  }
+  #sendBtn{
+    background:var(--amber); border:1px solid var(--ink); color:var(--ink); font-weight:700;
+    padding:11px 20px; cursor:pointer; font-family:'IBM Plex Mono'; font-size:0.8rem; text-transform:uppercase;
+  }
+  #sendBtn:hover{background:#d69528;}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .preset-btn{
+    font-family:'IBM Plex Mono'; font-size:0.68rem; padding:5px 10px; border:1px dashed var(--blue);
+    background:none; color:var(--blue); cursor:pointer;
+  }
+
+  .resp-body{padding:0;}
+  .status-bar{
+    padding:12px 16px; font-family:'IBM Plex Mono'; font-size:0.82rem; font-weight:600;
+    display:flex; justify-content:space-between; border-bottom:1px solid var(--ink);
+  }
+  .status-bar.ok{background:#e9f7ee; color:#22682f;}
+  .status-bar.err{background:#fbeae6; color:#8a2a17;}
+  .status-bar.idle{background:var(--paper-dim); color:#777;}
+  pre#respJson{
+    padding:16px; font-family:'IBM Plex Mono'; font-size:0.8rem; white-space:pre-wrap; word-break:break-word;
+    max-height:360px; overflow-y:auto; margin:0;
+  }
+  .hint{font-size:0.85rem; color:var(--graphite); margin-top:14px; line-height:1.6;}
+  .hint code{background:var(--paper-dim); padding:1px 5px; font-family:'IBM Plex Mono'; font-size:0.8rem;}
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <a class="back" href="../index.html">← Back to portfolio</a>
+  <span class="sheet-id">Sheet A-102 · REST API Design</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>REST API Explorer — Validation &amp; Error Handling</h1>
+    <p>A mock <code>/api/tasks</code> resource running fully client-side, simulating real request handling: input validation, proper status codes, and structured error responses — the same discipline applied to the actual Express endpoints in the project.</p>
+  </div>
+
+  <div class="explorer">
+    <div class="panel">
+      <div class="panel-title">Request</div>
+      <div class="req-body">
+        <div class="method-row" id="methodRow">
+          <button class="method-btn active" data-method="GET">GET</button>
+          <button class="method-btn" data-method="POST">POST</button>
+          <button class="method-btn" data-method="PUT">PUT</button>
+          <button class="method-btn" data-method="DELETE">DELETE</button>
+        </div>
+        <label class="field-label">Endpoint</label>
+        <select id="endpointSelect" class="endpoint-select">
+          <option value="/api/tasks">/api/tasks</option>
+          <option value="/api/tasks/1">/api/tasks/1</option>
+          <option value="/api/tasks/99">/api/tasks/99 (does not exist)</option>
+        </select>
+        <label class="field-label">Body (JSON)</label>
+        <textarea id="reqBody" placeholder='{ "title": "Write unit tests" }'></textarea>
+        <div class="presets">
+          <button class="preset-btn" data-preset="valid">Valid payload</button>
+          <button class="preset-btn" data-preset="missing">Missing field</button>
+          <button class="preset-btn" data-preset="badtype">Wrong type</button>
+        </div>
+        <button id="sendBtn">Send request</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Response</div>
+      <div class="resp-body">
+        <div class="status-bar idle" id="statusBar">Waiting for request…</div>
+        <pre id="respJson">—</pre>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Try it: switch to <code>POST</code>, click <b>Missing field</b>, then <b>Send request</b> — the mock server rejects it with <code>400</code> and a field-level validation message, the same pattern used to guard the real endpoints against bad input before it ever reaches the database.</p>
+</main>
+
+<footer class="demo-footer">© 2026 Cassandra Elena Perche Molina — Portfolio demo, not to scale.</footer>
+
+<script>
+(function(){
+  // Mock in-memory "database"
+  let tasks = [
+    { id: 1, title: "Design the database schema", done: true },
+    { id: 2, title: "Build the Express routes", done: false }
+  ];
+  let nextId = 3;
+
+  let currentMethod = "GET";
+  const methodRow = document.getElementById('methodRow');
+  methodRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.method-btn');
+    if(!btn) return;
+    [...methodRow.children].forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMethod = btn.dataset.method;
+  });
+
+  document.querySelectorAll('.preset-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = btn.dataset.preset;
+      const ta = document.getElementById('reqBody');
+      if(p === 'valid') ta.value = JSON.stringify({ title: "Write unit tests" }, null, 2);
+      if(p === 'missing') ta.value = JSON.stringify({ }, null, 2);
+      if(p === 'badtype') ta.value = JSON.stringify({ title: 12345 }, null, 2);
+    });
+  });
+
+  function respond(status, body){
+    const bar = document.getElementById('statusBar');
+    bar.className = 'status-bar ' + (status < 400 ? 'ok' : 'err');
+    bar.innerHTML = `<span>HTTP ${status} ${status<400 ? 'OK':'Error'}</span><span>${new Date().toLocaleTimeString()}</span>`;
+    document.getElementById('respJson').textContent = JSON.stringify(body, null, 2);
+  }
+
+  function validateTitle(payload){
+    if(payload.title === undefined){
+      return { field:"title", message:"\"title\" is required." };
+    }
+    if(typeof payload.title !== 'string'){
+      return { field:"title", message:"\"title\" must be a string." };
+    }
+    if(payload.title.trim().length === 0){
+      return { field:"title", message:"\"title\" cannot be empty." };
+    }
+    return null;
+  }
+
+  document.getElementById('sendBtn').addEventListener('click', ()=>{
+    const endpoint = document.getElementById('endpointSelect').value;
+    const raw = document.getElementById('reqBody').value.trim();
+    const idMatch = endpoint.match(/\/api\/tasks\/(\d+)/);
+    const id = idMatch ? Number(idMatch[1]) : null;
+
+    let payload = {};
+    if(raw){
+      try{ payload = JSON.parse(raw); }
+      catch(e){
+        respond(400, { error: "Malformed JSON", detail: e.message });
+        return;
+      }
+    }
+
+    if(currentMethod === 'GET'){
+      if(id){
+        const t = tasks.find(t=>t.id===id);
+        if(!t) return respond(404, { error: "Not found", detail: `No task with id ${id}.` });
+        return respond(200, t);
+      }
+      return respond(200, { count: tasks.length, tasks });
+    }
+
+    if(currentMethod === 'POST'){
+      const err = validateTitle(payload);
+      if(err) return respond(400, { error: "Validation failed", detail: err });
+      const task = { id: nextId++, title: payload.title.trim(), done: false };
+      tasks.push(task);
+      return respond(201, { message: "Task created", task });
+    }
+
+    if(currentMethod === 'PUT'){
+      if(!id) return respond(400, { error: "Missing id", detail: "PUT requires /api/tasks/:id" });
+      const t = tasks.find(t=>t.id===id);
+      if(!t) return respond(404, { error: "Not found", detail: `No task with id ${id}.` });
+      const err = validateTitle(payload);
+      if(err) return respond(400, { error: "Validation failed", detail: err });
+      t.title = payload.title.trim();
+      return respond(200, { message: "Task updated", task: t });
+    }
+
+    if(currentMethod === 'DELETE'){
+      if(!id) return respond(400, { error: "Missing id", detail: "DELETE requires /api/tasks/:id" });
+      const idx = tasks.findIndex(t=>t.id===id);
+      if(idx === -1) return respond(404, { error: "Not found", detail: `No task with id ${id}.` });
+      const removed = tasks.splice(idx,1)[0];
+      return respond(200, { message: "Task deleted", task: removed });
+    }
+  });
+})();
+</script>
+</body>
+</html>

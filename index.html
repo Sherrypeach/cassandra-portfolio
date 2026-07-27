@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cassandra Perche Molina — Full-Stack Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2545;
+    --blue:#173A63;
+    --cyan:#5FC9D6;
+    --cyan-dim:rgba(95,201,214,0.28);
+    --paper:#F6F4EE;
+    --paper-dim:#EAE7DD;
+    --amber:#E8A33D;
+    --graphite:#33404D;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
+  a{color:inherit;}
+
+  /* ---------- Blueprint grid background ---------- */
+  .blueprint-bg{
+    position:relative;
+    background-color:var(--ink);
+    background-image:
+      linear-gradient(var(--cyan-dim) 1px, transparent 1px),
+      linear-gradient(90deg, var(--cyan-dim) 1px, transparent 1px);
+    background-size:44px 44px;
+  }
+  .blueprint-bg::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(95,201,214,0.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(95,201,214,0.5) 1px, transparent 1px);
+    background-size:220px 220px;
+    pointer-events:none;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    color:var(--paper);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:40px 6vw 0 6vw;
+  }
+  .hero-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    font-size:0.75rem; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--cyan); opacity:0.9;
+  }
+  .hero-main{
+    flex:1; display:flex; flex-direction:column; justify-content:center;
+    max-width:980px;
+  }
+  .eyebrow{
+    font-size:0.8rem; letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--amber); margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 5rem);
+    font-weight:700; line-height:1.02; letter-spacing:-0.01em;
+    max-width:16ch;
+  }
+  .hero .role-line{
+    margin-top:24px; font-size:clamp(1rem, 2vw, 1.35rem);
+    color:var(--cyan); font-weight:500;
+  }
+  .hero .role-line span{color:var(--paper); opacity:0.65;}
+
+  /* Title block, like a real architectural drawing */
+  .title-block{
+    align-self:flex-end;
+    border:1px solid var(--cyan-dim);
+    border-bottom:none;
+    width:min(420px, 90vw);
+    font-size:0.72rem;
+    color:var(--paper);
+  }
+  .title-block .row{
+    display:flex; border-bottom:1px solid var(--cyan-dim);
+  }
+  .title-block .row > div{
+    flex:1; padding:8px 12px; border-right:1px solid var(--cyan-dim);
+  }
+  .title-block .row > div:last-child{border-right:none;}
+  .title-block .label{color:var(--cyan); text-transform:uppercase; letter-spacing:0.08em; font-size:0.62rem; margin-bottom:3px;}
+
+  .scroll-cue{
+    text-align:center; padding:22px 0; font-size:0.7rem;
+    letter-spacing:0.15em; text-transform:uppercase; color:var(--cyan); opacity:0.75;
+  }
+
+  /* ---------- Sections ---------- */
+  section{padding:100px 6vw;}
+  .section-head{display:flex; align-items:baseline; gap:18px; margin-bottom:52px;}
+  .section-num{font-family:'IBM Plex Mono'; color:var(--amber); font-size:0.95rem;}
+  .section-head h2{font-size:clamp(1.6rem, 3vw, 2.4rem); color:var(--ink);}
+  .section-head .rule{flex:1; height:1px; background:var(--ink); opacity:0.15;}
+
+  /* About / spec sheet */
+  .about-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:60px; align-items:start;
+  }
+  .about-grid p{font-size:1.05rem; color:var(--graphite); max-width:60ch;}
+  .about-grid p + p{margin-top:16px;}
+  .spec-sheet{
+    border:1px solid var(--ink); background:var(--paper-dim);
+  }
+  .spec-sheet .spec-row{
+    display:flex; justify-content:space-between; padding:12px 16px;
+    border-bottom:1px dashed rgba(11,37,69,0.25); font-size:0.85rem;
+  }
+  .spec-sheet .spec-row:last-child{border-bottom:none;}
+  .spec-sheet .spec-row span:first-child{color:var(--blue); font-family:'IBM Plex Mono'; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;}
+  .spec-sheet .spec-row span:last-child{font-weight:600; text-align:right;}
+
+  /* Skills legend */
+  .legend-box{border:1px solid var(--ink); background:var(--paper);}
+  .legend-title{
+    background:var(--ink); color:var(--paper); font-family:'IBM Plex Mono';
+    font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase;
+    padding:10px 16px;
+  }
+  .legend-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+  .legend-col{padding:24px; border-right:1px dashed rgba(11,37,69,0.2); border-bottom:1px dashed rgba(11,37,69,0.2);}
+  .legend-col:last-child{border-right:none;}
+  .legend-col h4{font-family:'IBM Plex Mono'; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--amber); margin-bottom:14px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-size:0.8rem; padding:6px 12px; border:1px solid var(--ink);
+    font-family:'IBM Plex Mono'; color:var(--ink);
+  }
+
+  /* Workflow — signature element */
+  .workflow-wrap{
+    background:var(--ink); color:var(--paper); padding:70px 5vw; position:relative;
+  }
+  .workflow-wrap .section-head .rule{background:var(--cyan); opacity:0.35;}
+  .workflow-wrap .section-head h2{color:var(--paper);}
+  .workflow-wrap .section-num{color:var(--amber);}
+  .workflow-track{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:0; position:relative;
+  }
+  .workflow-track::before{
+    content:""; position:absolute; top:34px; left:4%; right:4%; height:2px;
+    background:repeating-linear-gradient(90deg, var(--cyan) 0 10px, transparent 10px 18px);
+    z-index:0;
+  }
+  .wf-step{position:relative; z-index:1; padding:0 10px; text-align:left;}
+  .wf-dot{
+    width:14px; height:14px; border-radius:50%; background:var(--ink);
+    border:2px solid var(--cyan); margin-bottom:18px;
+  }
+  .wf-step .wf-num{font-family:'IBM Plex Mono'; color:var(--amber); font-size:0.75rem; display:block; margin-bottom:6px;}
+  .wf-step h4{font-size:1rem; margin-bottom:8px; color:var(--paper);}
+  .wf-step p{font-size:0.82rem; color:var(--cyan); opacity:0.9; line-height:1.5;}
+
+  /* Projects as drawing plates */
+  .plates{display:flex; flex-direction:column; gap:0;}
+  .plate{
+    display:grid; grid-template-columns:130px 1fr; border-top:1px solid var(--ink);
+  }
+  .plates .plate:last-child{border-bottom:1px solid var(--ink);}
+  .plate-id{
+    background:var(--paper-dim); padding:26px 16px; font-family:'IBM Plex Mono';
+    font-size:0.78rem; color:var(--blue); border-right:1px solid var(--ink);
+  }
+  .plate-id .sheet{display:block; font-size:1.4rem; font-weight:600; color:var(--ink); margin-bottom:6px;}
+  .plate-body{padding:26px 30px;}
+  .plate-body h3{font-size:1.15rem; margin-bottom:8px;}
+  .plate-body p{color:var(--graphite); font-size:0.95rem; max-width:70ch; margin-bottom:12px;}
+  .plate-tags{display:flex; flex-wrap:wrap; gap:8px;}
+  .tag{font-size:0.72rem; font-family:'IBM Plex Mono'; padding:4px 10px; border:1px solid var(--blue); color:var(--blue);}
+  .plate-note{font-size:0.78rem; color:var(--amber); font-style:italic; margin-top:10px;}
+
+  /* Experience */
+  .exp-item{display:grid; grid-template-columns:200px 1fr; gap:24px; padding:22px 0; border-bottom:1px dashed rgba(11,37,69,0.2);}
+  .exp-item:first-child{border-top:1px dashed rgba(11,37,69,0.2);}
+  .exp-date{font-family:'IBM Plex Mono'; font-size:0.8rem; color:var(--blue);}
+  .exp-body h3{font-size:1.05rem; margin-bottom:6px;}
+  .exp-body ul{color:var(--graphite); font-size:0.92rem; padding-left:18px;}
+  .exp-body li{margin-bottom:4px;}
+
+  /* Contact / stamp */
+  .contact-wrap{
+    background:var(--ink); color:var(--paper); padding:90px 6vw; text-align:center;
+  }
+  .stamp{
+    display:inline-block; border:2px solid var(--amber); color:var(--amber);
+    padding:14px 26px; font-family:'IBM Plex Mono'; font-size:0.8rem;
+    letter-spacing:0.1em; text-transform:uppercase; transform:rotate(-3deg);
+    margin-bottom:28px;
+  }
+  .contact-wrap h2{font-size:clamp(1.8rem,4vw,2.8rem); margin-bottom:20px;}
+  .contact-links{display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-top:26px; font-family:'IBM Plex Mono'; font-size:0.95rem;}
+  .contact-links a{border-bottom:1px solid var(--cyan); padding-bottom:2px;}
+  footer{text-align:center; padding:26px; font-size:0.7rem; color:var(--graphite); font-family:'IBM Plex Mono'; letter-spacing:0.05em;}
+
+  @media (max-width:760px){
+    .about-grid{grid-template-columns:1fr;}
+    .legend-grid{grid-template-columns:1fr;}
+    .legend-col{border-right:none;}
+    .workflow-track{grid-template-columns:1fr; gap:36px;}
+    .workflow-track::before{display:none;}
+    .plate{grid-template-columns:1fr;}
+    .plate-id{border-right:none; border-bottom:1px dashed rgba(11,37,69,0.3);}
+    .exp-item{grid-template-columns:1fr; gap:8px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity 0.6s ease, transform 0.6s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="blueprint-bg hero">
+  <div class="hero-top">
+    <span>Technical Portfolio — Rev. 2026</span>
+    <span>Sheet 01 / 01</span>
+  </div>
+  <div class="hero-main">
+    <div class="eyebrow">Full-Stack Developer · Co-Coding Architect</div>
+    <h1>Cassandra Elena<br>Perche Molina</h1>
+    <div class="role-line">Node.js · Express · PostgreSQL <span>— building software by guiding AI, not just accepting it.</span></div>
+  </div>
+  <div class="title-block">
+    <div class="row">
+      <div><div class="label">Project</div>Professional portfolio</div>
+      <div><div class="label">Scale</div>N/A</div>
+    </div>
+    <div class="row">
+      <div><div class="label">Drafted by</div>C. Perche Molina</div>
+      <div><div class="label">Contact</div>casperche27@gmail.com</div>
+    </div>
+  </div>
+  <div class="scroll-cue">↓ scroll</div>
+</div>
+
+<section id="about">
+  <div class="section-head">
+    <span class="section-num mono">01</span>
+    <h2>Profile</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="about-grid reveal">
+    <div>
+      <p>Software Development student at Brigham Young University–Idaho, with a completed Web &amp; Computer Programming Certificate. I build full-stack applications with modern technologies and work actively with AI-assisted development tools — not as a shortcut, but as a deliberate part of the workflow: plan, guide, review, and correct.</p>
+      <p>Bilingual communicator with professional English (C2) and real client-facing experience: I coordinate communications and resolve issues daily, translating unclear needs into concrete steps.</p>
+    </div>
+    <div class="spec-sheet">
+      <div class="spec-row"><span>Education</span><span>B.S. Software Development (in progress)</span></div>
+      <div class="spec-row"><span>Certification</span><span>Web &amp; Computer Programming</span></div>
+      <div class="spec-row"><span>Languages</span><span>Spanish (native) · English (C2)</span></div>
+      <div class="spec-row"><span>Focus</span><span>Full-stack + AI-assisted dev</span></div>
+      <div class="spec-row"><span>Availability</span><span>Remote, U.S. time zones</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="section-head">
+    <span class="section-num mono">02</span>
+    <h2>Technical Legend</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="legend-box reveal">
+    <div class="legend-title">Materials &amp; tools</div>
+    <div class="legend-grid">
+      <div class="legend-col">
+        <h4>Languages &amp; Stack</h4>
+        <div class="chip-row">
+          <span class="chip">JavaScript</span><span class="chip">Node.js</span><span class="chip">Express.js</span>
+          <span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="legend-col">
+        <h4>Architecture</h4>
+        <div class="chip-row">
+          <span class="chip">MVC</span><span class="chip">REST APIs</span><span class="chip">Git / GitHub</span>
+        </div>
+      </div>
+      <div class="legend-col">
+        <h4>AI Co-Coding</h4>
+        <div class="chip-row">
+          <span class="chip">Claude Code</span><span class="chip">OpenAI Codex</span><span class="chip">ChatGPT</span>
+          <span class="chip">GitHub Copilot</span><span class="chip">Prompt Engineering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="workflow-wrap">
+  <div class="section-head">
+    <span class="section-num mono">03</span>
+    <h2>How I Work With AI</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="workflow-track reveal">
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">01</span>
+      <h4>Discover</h4>
+      <p>Understand the client's requirements and the project's real constraints.</p>
+    </div>
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">02</span>
+      <h4>Plan</h4>
+      <p>Define MVC architecture, data models, and acceptance criteria before writing code.</p>
+    </div>
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">03</span>
+      <h4>Guide</h4>
+      <p>Direct the AI with precise instructions instead of accepting the first result.</p>
+    </div>
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">04</span>
+      <h4>Audit</h4>
+      <p>Review security, error handling, and quality before accepting any change.</p>
+    </div>
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">05</span>
+      <h4>Refine</h4>
+      <p>Challenge and rewrite when the architecture or logic isn't solid.</p>
+    </div>
+    <div class="wf-step">
+      <div class="wf-dot"></div>
+      <span class="wf-num">06</span>
+      <h4>Ship</h4>
+      <p>Document, deploy, and validate in production with the client.</p>
+    </div>
+  </div>
+</div>
+
+<section id="projects">
+  <div class="section-head">
+    <span class="section-num mono">04</span>
+    <h2>Selected Projects</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="plates reveal">
+    <div class="plate">
+      <div class="plate-id"><span class="sheet">A-101</span>Full-stack web app</div>
+      <div class="plate-body">
+        <h3>MVC Web Application with Node.js, Express &amp; PostgreSQL</h3>
+        <p>A complete application built following Model-View-Controller architecture: models, controllers, routes, and views, with AI as an active assistant at every layer, reviewed and adjusted at each iteration.</p>
+        <div class="plate-tags">
+          <span class="tag">Node.js</span><span class="tag">Express</span><span class="tag">PostgreSQL</span><span class="tag">MVC</span>
+        </div>
+        <div class="plate-note">→ <a href="demos/mvc-demo.html">View live demo</a> · add your GitHub repo link here.</div>
+      </div>
+    </div>
+    <div class="plate">
+      <div class="plate-id"><span class="sheet">A-102</span>REST API</div>
+      <div class="plate-body">
+        <h3>REST Endpoint Design &amp; Implementation</h3>
+        <p>Route definitions, data validation, and error handling — auditing AI-generated code to ensure sound security practices and consistency with the project's architecture.</p>
+        <div class="plate-tags">
+          <span class="tag">REST</span><span class="tag">Express</span><span class="tag">Validation</span>
+        </div>
+        <div class="plate-note">→ <a href="demos/rest-api-demo.html">View live demo</a> · add your GitHub repo link here.</div>
+      </div>
+    </div>
+    <div class="plate">
+      <div class="plate-id"><span class="sheet">A-103</span>AI-assisted dev</div>
+      <div class="plate-body">
+        <h3>End-to-End AI-Guided Development Workflow</h3>
+        <p>A project built using Claude Code and related tools as active implementation partners, with architecture decisions, quality review, and deployment guided by independent judgment.</p>
+        <div class="plate-tags">
+          <span class="tag">Claude Code</span><span class="tag">Prompt Engineering</span><span class="tag">Deployment</span>
+        </div>
+        <div class="plate-note">→ <a href="demos/ai-workflow-demo.html">View live demo</a> · add your GitHub repo link here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="section-head">
+    <span class="section-num mono">05</span>
+    <h2>Experience</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="reveal">
+    <div class="exp-item">
+      <div class="exp-date">Jul 2022 — Present</div>
+      <div class="exp-body">
+        <h3>Customer Service Coordinator — Alianza Idiomas</h3>
+        <ul>
+          <li>Resolve student and teacher issues.</li>
+          <li>Coordinate communications and documentation in English.</li>
+          <li>Manage records and improve problem resolution.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-item">
+      <div class="exp-date">2021 — Present</div>
+      <div class="exp-body">
+        <h3>ESL Teacher — Alianza Idiomas</h3>
+        <ul>
+          <li>Teach Business English (C1–C2).</li>
+          <li>Develop learning materials.</li>
+          <li>Deliver professional communication training.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="contact-wrap">
+  <div class="stamp">Available for hire</div>
+  <h2>Let's build something together.</h2>
+  <p style="color:var(--cyan); max-width:50ch; margin:0 auto;">Full-stack + AI as a development partner, not a replacement for judgment.</p>
+  <div class="contact-links">
+    <a href="mailto:casperche27@gmail.com">casperche27@gmail.com</a>
+    <a href="tel:+541157424181">+54 11 5742-4181</a>
+  </div>
+</div>
+<footer>© 2026 Cassandra Elena Perche Molina — Portfolio sheet, not to scale.</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

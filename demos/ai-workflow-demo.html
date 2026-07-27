@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-103 — AI Co-Coding Review Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .tabs{display:flex; gap:0; margin-bottom:0; flex-wrap:wrap;}
+  .tab-btn{
+    font-family:'IBM Plex Mono'; font-size:0.75rem; padding:10px 16px; border:1px solid var(--ink);
+    border-bottom:none; background:var(--paper-dim); cursor:pointer; color:var(--ink);
+  }
+  .tab-btn.active{background:#fff; font-weight:600;}
+  .review-grid{display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--ink); border-top:none;}
+  @media (max-width:800px){ .review-grid{grid-template-columns:1fr;} }
+  .code-col{padding:0;}
+  .code-col + .code-col{border-left:1px solid var(--ink);}
+  @media (max-width:800px){ .code-col + .code-col{border-left:none; border-top:1px solid var(--ink);} }
+  .col-label{
+    font-family:'IBM Plex Mono'; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em;
+    padding:10px 16px; border-bottom:1px solid rgba(11,37,69,0.15);
+  }
+  .col-label.draft{background:#fbeae6; color:#8a2a17;}
+  .col-label.final{background:#e9f7ee; color:#22682f;}
+  pre.code{
+    font-family:'IBM Plex Mono'; font-size:0.8rem; line-height:1.65; padding:18px; margin:0;
+    overflow-x:auto; white-space:pre;
+  }
+  .flag{
+    background:#fbeae6; border-left:3px solid var(--red); cursor:pointer; display:block;
+  }
+  .fix{
+    background:#e9f7ee; border-left:3px solid var(--green); display:block;
+  }
+  .issues{padding:18px; border-top:1px dashed rgba(11,37,69,0.2);}
+  .issue{
+    display:flex; gap:12px; padding:10px 0; border-bottom:1px dashed rgba(11,37,69,0.15); font-size:0.88rem;
+  }
+  .issue .icon{color:var(--red); font-weight:700; font-family:'IBM Plex Mono';}
+  .issue .body b{color:var(--ink);}
+  .issue .body span{color:var(--graphite); display:block; margin-top:2px;}
+  .note{font-size:0.85rem; color:var(--graphite); margin-top:20px; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <a class="back" href="../index.html">← Back to portfolio</a>
+  <span class="sheet-id">Sheet A-103 · AI Co-Coding Workflow</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>AI Co-Coding Review — Before &amp; After</h1>
+    <p>This is the auditing step from the workflow diagram on the main page, made concrete: an AI-generated draft on the left, the reviewed and corrected version on the right, with the specific issues that were caught and why they mattered.</p>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-case="1">Case 1 — Login endpoint</button>
+    <button class="tab-btn" data-case="2">Case 2 — Data fetch</button>
+  </div>
+
+  <div class="review-grid" id="reviewGrid"></div>
+
+  <p class="note">Reviewing AI output for architecture, security, and error handling — and rewriting it when it falls short — is the actual job: guiding implementation instead of accepting the first draft.</p>
+</main>
+
+<footer class="demo-footer">© 2026 Cassandra Elena Perche Molina — Portfolio demo, not to scale.</footer>
+
+<script>
+const cases = {
+  "1": {
+    draftLabel: "AI first draft",
+    finalLabel: "Reviewed &amp; corrected",
+    draft: [
+      { t: `app.post('/login', (req, res) => {`, flag:false },
+      { t: `  const { email, password } = req.body;`, flag:false },
+      { t: `  const query = "SELECT * FROM users WHERE `, flag:true, id:1 },
+      { t: `    email='" + email + "' AND password='" + password + "'";`, flag:true, id:1 },
+      { t: `  db.query(query, (err, user) => {`, flag:true, id:2 },
+      { t: `    res.json({ success: true, user });`, flag:true, id:3 },
+      { t: `  });`, flag:false },
+      { t: `});`, flag:false },
+    ],
+    final: [
+      { t: `app.post('/login', async (req, res) => {`, fix:false },
+      { t: `  const { email, password } = req.body;`, fix:false },
+      { t: `  if (!email || !password) {`, fix:true, id:'v' },
+      { t: `    return res.status(400).json({ error: 'Email and password required' });`, fix:true, id:'v' },
+      { t: `  }`, fix:true, id:'v' },
+      { t: `  const user = await db.query(`, fix:true, id:1 },
+      { t: `    'SELECT id, email, password_hash FROM users WHERE email = $1', [email]`, fix:true, id:1 },
+      { t: `  );`, fix:true, id:1 },
+      { t: `  const valid = user && await bcrypt.compare(password, user.password_hash);`, fix:true, id:2 },
+      { t: `  if (!valid) return res.status(401).json({ error: 'Invalid credentials' });`, fix:true, id:2 },
+      { t: `  res.json({ success: true, user: { id: user.id, email: user.email } });`, fix:true, id:3 },
+      { t: `});`, fix:false },
+    ],
+    issues: [
+      { id:1, title:"SQL injection via string concatenation", detail:"Raw values were spliced directly into the query string. Fixed with a parameterized query ($1)." },
+      { id:2, title:"Plaintext password comparison", detail:"Passwords were compared as-is with no hashing. Fixed with bcrypt.compare against a stored hash." },
+      { id:3, title:"Full user record returned, including password hash", detail:"The response leaked internal fields. Fixed to return only the id and email." },
+    ]
+  },
+  "2": {
+    draftLabel: "AI first draft",
+    finalLabel: "Reviewed &amp; corrected",
+    draft: [
+      { t: `app.get('/api/orders/:id', (req, res) => {`, flag:false },
+      { t: `  const order = orders.find(o => o.id == req.params.id);`, flag:true, id:1 },
+      { t: `  res.json(order.items);`, flag:true, id:2 },
+      { t: `});`, flag:false },
+    ],
+    final: [
+      { t: `app.get('/api/orders/:id', (req, res) => {`, fix:false },
+      { t: `  const id = Number(req.params.id);`, fix:true, id:'v' },
+      { t: `  if (!Number.isInteger(id)) {`, fix:true, id:'v' },
+      { t: `    return res.status(400).json({ error: 'Invalid order id' });`, fix:true, id:'v' },
+      { t: `  }`, fix:true, id:'v' },
+      { t: `  const order = orders.find(o => o.id === id);`, fix:true, id:1 },
+      { t: `  if (!order) {`, fix:true, id:2 },
+      { t: `    return res.status(404).json({ error: 'Order not found' });`, fix:true, id:2 },
+      { t: `  }`, fix:true, id:2 },
+      { t: `  res.json(order.items);`, fix:false },
+      { t: `});`, fix:false },
+    ],
+    issues: [
+      { id:1, title:"Loose equality and no input validation", detail:"'==' allowed type coercion on the id, and a non-numeric id would crash the lookup. Fixed with explicit Number() conversion and validation." },
+      { id:2, title:"No handling for a missing order", detail:"If .find() returned undefined, accessing .items would throw a server error. Fixed with an explicit 404 check." },
+    ]
+  }
+};
+
+function renderCase(key){
+  const c = cases[key];
+  const grid = document.getElementById('reviewGrid');
+
+  function renderCode(lines, kind){
+    return lines.map(l => {
+      const cls = kind==='draft' ? (l.flag ? 'flag' : '') : (l.fix ? 'fix' : '');
+      const dataId = l.id !== undefined ? ` data-id="${l.id}"` : '';
+      return `<span class="${cls}"${dataId}>${escapeHtml(l.t)}</span>`;
+    }).join('\n');
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+  }
+
+  grid.innerHTML = `
+    <div class="code-col">
+      <div class="col-label draft">${c.draftLabel}</div>
+      <pre class="code">${renderCode(c.draft, 'draft')}</pre>
+      <div class="issues">
+        ${c.issues.map(i => `<div class="issue"><span class="icon">!</span><div class="body"><b>${i.title}</b><span>${i.detail}</span></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="code-col">
+      <div class="col-label final">${c.finalLabel}</div>
+      <pre class="code">${renderCode(c.final, 'final')}</pre>
+    </div>
+  `;
+}
+
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCase(btn.dataset.case);
+});
+
+renderCase("1");
+</script>
+</body>
+</html>
