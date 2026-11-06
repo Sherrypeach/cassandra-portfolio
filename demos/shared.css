@@ -1,6 +1,6 @@
 :root{
-  --ink:#2B2420; --blue:#5B4636; --cyan:#C9A66B; --cyan-dim:rgba(201,166,107,0.28);
-  --paper:#F3EDE3; --paper-dim:#E7DCC8; --amber:#A6552E; --graphite:#5C5248;
+  --ink:#3a2a2f; --blue:#7a5c64; --cyan:#e2c4cc; --cyan-dim:rgba(168,135,143,0.28);
+  --paper:#fbf5f7; --paper-dim:#f4e6ea; --amber:#A8878F; --graphite:#6b5f62;
   --green:#3FA65C; --red:#B33A2E;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
