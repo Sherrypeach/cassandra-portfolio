@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Design | Cassandra Perche</title>
+<meta name="description" content="Email design samples by Cassandra Perche: promotional, welcome, transactional and automated emails built in responsive HTML.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2B2420;--muted:#6E625A;--mauve:#B07A82;--mauve-deep:#8A5560;--line:#E6DCCD;--paper:#FBF8F3;--card:#FFFDF9;--blush:#EFE6D8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+nav{border-bottom:1px solid var(--line);background:rgba(251,248,243,.92);position:sticky;top:0;z-index:5;backdrop-filter:blur(8px)}
+nav .wrap{display:flex;justify-content:space-between;align-items:center;height:64px}
+.logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);text-decoration:none}.logo span{color:var(--mauve)}
+nav a.back{font-size:.9rem;color:var(--mauve-deep);text-decoration:none;border-bottom:1px solid var(--mauve)}
+header{padding:64px 0 34px}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mauve-deep)}
+h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.3rem);font-weight:600;line-height:1.1;margin:10px 0 16px}
+.lead{max-width:680px;color:var(--muted);font-size:1.05rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:.75rem;border:1px solid var(--mauve);color:var(--mauve-deep);padding:4px 11px;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;padding:20px 0 40px}
+.mail{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
+.mail:hover{transform:translateY(-4px);box-shadow:0 22px 40px -24px rgba(43,36,32,.35)}
+.thumb{position:relative;height:300px;overflow:hidden;background:var(--blush);cursor:pointer;border:0;padding:0;display:block;width:100%}
+.thumb img{width:100%;display:block;transition:transform 3.5s ease}
+.mail:hover .thumb img{transform:translateY(calc(-100% + 300px))}
+.type{position:absolute;left:12px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:#FBF8F3;background:rgba(43,36,32,.75);padding:3px 9px;border-radius:3px}
+.mbody{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.mbody h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600}
+.mbody p{font-size:.87rem;color:var(--muted)}
+.mbody ul{list-style:none;font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.mbody li:before{content:"· ";color:var(--mauve)}
+.acts{margin-top:auto;display:flex;gap:8px;padding-top:6px}
+.acts button,.acts a{font:inherit;font-size:.8rem;font-weight:600;padding:7px 12px;border-radius:20px;border:1px solid var(--mauve-deep);background:transparent;color:var(--mauve-deep);cursor:pointer;text-decoration:none}
+.acts button.pri{background:var(--mauve-deep);color:#FBF8F3}
+.process{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;padding:10px 0 50px}
+.step{border-top:2px solid var(--mauve);padding-top:12px}.step b{font-family:'Playfair Display',serif;font-size:1.05rem;display:block;margin-bottom:4px}.step p{font-size:.88rem;color:var(--muted)}
+h2{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:600;margin:20px 0 14px}
+.note{font-size:.82rem;color:var(--muted);border-left:3px solid var(--mauve);padding:10px 14px;background:var(--card);border-radius:0 8px 8px 0;margin-bottom:60px}
+footer{border-top:1px solid var(--line);padding:26px 0;font-size:.85rem;color:var(--muted)}
+footer a{color:var(--mauve-deep)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(30,24,22,.72);display:none;align-items:flex-start;justify-content:center;z-index:20;padding:24px;overflow:auto}
+.modal.open{display:flex}
+.mbox{background:var(--paper);border-radius:14px;padding:14px;max-width:100%}
+.mtop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.mtop b{font-family:'Playfair Display',serif;font-size:1.1rem}
+.seg{display:flex;border:1px solid var(--mauve-deep);border-radius:20px;overflow:hidden}
+.seg button{font:inherit;font-size:.8rem;padding:6px 14px;border:0;background:transparent;color:var(--mauve-deep);cursor:pointer}
+.seg button.on{background:var(--mauve-deep);color:#fff}
+.close{font-size:1.4rem;background:none;border:0;cursor:pointer;color:var(--ink);line-height:1}
+iframe{border:0;border-radius:10px;background:#fff;display:block;margin:0 auto;height:78vh;transition:width .3s}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="logo" href="index.html">Cassandra <span>Perche</span></a><a class="back" href="index.html#projects">← Back to portfolio</a></div></nav>
+
+<header><div class="wrap">
+  <div class="eyebrow">Email Design</div>
+  <h1>Emails that look good and get clicked</h1>
+  <p class="lead">A selection of email templates I designed and coded in responsive HTML: a promotional campaign, a welcome email, a shipping notification and an automated reminder. Each one is built with table layouts and inline styles so it holds up in Gmail, Outlook and Apple Mail, and stacks cleanly on mobile.</p>
+  <div class="chips"><span class="chip">Responsive HTML</span><span class="chip">Mobile-first</span><span class="chip">Modular blocks</span><span class="chip">Accessibility</span><span class="chip">Klaviyo · Mailchimp ready</span></div>
+</div></header>
+
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+
+  <h2>How I design an email</h2>
+  <div class="process">
+    <div class="step"><b>1. Brief and goal</b><p>One clear goal per email, the audience and where it sits in the customer journey.</p></div>
+    <div class="step"><b>2. Layout in modules</b><p>Reusable blocks (hero, product grid, steps, order summary) so the team can build new emails fast.</p></div>
+    <div class="step"><b>3. Build and test</b><p>Table-based HTML, inline styles, bulletproof buttons, alt text and checks on Gmail, Outlook, Apple Mail and mobile.</p></div>
+    <div class="step"><b>4. Measure and improve</b><p>A/B tests on subject lines, CTAs and layout, then iterate on open and click results.</p></div>
+  </div>
+  <p class="note">These are concept designs for fictional brands, made to show my process and style. Emails I designed for companies are under NDA and I'm happy to walk through them on a call.</p>
+</main>
+
+<footer><div class="wrap">Cassandra Perche · <a href="index.html">Portfolio</a> · <a href="https://www.linkedin.com/in/cassandra-perche-77664a42b" target="_blank" rel="noopener">LinkedIn</a></div></footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="mbox">
+    <div class="mtop"><b id="mtitle"></b>
+      <div class="seg"><button class="on" data-w="640">Desktop</button><button data-w="375">Mobile</button></div>
+      <a id="mopen" href="#" target="_blank" rel="noopener" style="font-size:.8rem;color:var(--mauve-deep)">Open full email ↗</a>
+      <button class="close" id="mclose" aria-label="Close">×</button></div>
+    <iframe id="mframe" title="Email preview" style="width:640px"></iframe>
+  </div>
+</div>
+
+<script>
+var MAILS=[
+ {f:'promo-bloom-batch',t:'Bloom & Batch · Holiday Sale',type:'Promotional campaign',d:'A 48-hour sale for a DTC candle brand, built to drive clicks to the shop.',p:['Bold hero with one main CTA','Product grid that stacks on mobile','Shipping and gift perks to reduce friction']},
+ {f:'welcome-lingua-cafe',t:'Lingua Café · Welcome email',type:'Welcome flow',d:'First email in the onboarding flow for an online language school.',p:['Personalized greeting','3-step "how it works" module','Student testimonial for trust']},
+ {f:'shipped-warm-bowl',t:'Warm Bowl Co. · Order shipped',type:'Transactional',d:'Shipping notification for a gift-delivery brand, clear at a glance.',p:['Delivery progress tracker','Order summary table','Support link before delivery']},
+ {f:'refill-lumen',t:'Lumen · Refill reminder',type:'Automated flow',d:'Reminder email for a telehealth subscription, triggered before the next refill.',p:['Deadline in the first line','Quick-action cards','Check-in block to boost engagement']}
+];
+var g=document.getElementById('grid');
+MAILS.forEach(function(m,i){
+  var el=document.createElement('article');el.className='mail';
+  el.innerHTML='<button class="thumb" data-i="'+i+'" aria-label="Preview '+m.t+'"><img src="img/emails/'+m.f+'.jpg" alt="'+m.t+' email preview" loading="lazy"><span class="type">'+m.type+'</span></button>'+
+  '<div class="mbody"><h3>'+m.t+'</h3><p>'+m.d+'</p><ul>'+m.p.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'+
+  '<div class="acts"><button class="pri" data-i="'+i+'">Preview</button><a href="emails/'+m.f+'.html" target="_blank" rel="noopener">HTML ↗</a></div></div>';
+  g.appendChild(el);
+});
+var modal=document.getElementById('modal'),fr=document.getElementById('mframe');
+function open(i){var m=MAILS[i];document.getElementById('mtitle').textContent=m.t;fr.src='emails/'+m.f+'.html';document.getElementById('mopen').href='emails/'+m.f+'.html';setW(640);modal.classList.add('open');}
+function setW(w){fr.style.width=Math.min(w,window.innerWidth-60)+'px';document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',+b.dataset.w===w)})}
+g.addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b)open(+b.dataset.i)});
+document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){setW(+b.dataset.w)}});
+document.getElementById('mclose').onclick=function(){modal.classList.remove('open');fr.src='about:blank'};
+modal.addEventListener('click',function(e){if(e.target===modal)document.getElementById('mclose').click()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('mclose').click()});
+</script>
+</body>
+</html>
